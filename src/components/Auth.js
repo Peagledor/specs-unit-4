@@ -8,9 +8,13 @@ const Auth = () => {
   const [register, setRegister] = useState(true);
   const { dispatch } = useContext(AuthContext);
 
+  
   const submitHandler = (e) => {
     e.preventDefault();
-    
+
+    dispatch({type: 'CHANGE_USERNAME', payload: username})
+    setUsername("")
+
     console.log("submitHandler called");
   };
 
@@ -18,8 +22,8 @@ const Auth = () => {
     <main>
       <h1>Welcome!</h1>
       <form className="form auth-form" onSubmit={submitHandler}>
-        <input className="form-input" />
-        <input className="form-input" />
+        <input className="form-input" placeholder="enter username" />
+        <input className="form-input" placeholder="enter password" />
         <button className="form-btn">{register ? "Sign Up" : "Login"}</button>
       </form>
       <button className="form-btn" onClick={() => setRegister(!register)}>

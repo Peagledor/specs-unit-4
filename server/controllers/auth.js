@@ -1,7 +1,11 @@
-const login = () => {
-    return
-};
+module.exports = {
+   login: async (req, res) => {
+    console.log('login')
+    res.sendStatus(200)
+  },
 
-const register = () => {
-return
-};
+  register: async (req,res) => {
+    console.log('register')
+    res.sendStatus(200)
+  }
+}
