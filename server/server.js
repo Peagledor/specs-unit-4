@@ -1,5 +1,6 @@
 const http = require("http");
 const { register, login } = require("./controllers/auth");
+const { isAuthenticated } = require("./middleware/middleware");
 const {
   getAllPosts,
   getCurrentUserPosts,
@@ -9,15 +10,13 @@ const {
 } = require("./controllers/posts");
 
 const express = require("express");
-const PORT = 3000; // may need to transfer to .env and import with .process
+const PORT = 4005; 
 
 const app = express();
 const server = http.createServer(app);
 
-//homepage endpoint
-app.use("/", (req, res, next) => {
-  res.send("Homepage");
-});
+app.use(express.json());
+
 
 //auth endpoints
 app.post("/register", register);
@@ -28,10 +27,10 @@ app.get("./posts", getAllPosts);
 
 //current user enpoints
 app.get("/userposts/:userId", getCurrentUserPosts);
-app.post("/posts", addPost);
-app.put("/posts/:userId", editPost);
-app.delete("/posts/:id", deletePost);
+app.post("/posts", isAuthenticated, addPost);
+app.put("/posts/:userId", isAuthenticated, editPost);
+app.delete("/posts/:id", isAuthenticated, deletePost);
 
 // runs server
-console.log("Running on 3000!");
+console.log("Running on 4005!");
 server.listen(PORT);
