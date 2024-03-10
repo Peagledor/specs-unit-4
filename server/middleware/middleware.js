@@ -3,6 +3,7 @@ const jwt = require("jsonwebtoken"); //requires jwt from node modules
 const { SECRET } = process.env; // destructures my secret from env file
 
 
+
 module.exports = {
   isAuthenticated: (req, res, next) => {
     //function that checks whether the client's authentication is valid

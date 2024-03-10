@@ -1,7 +1,10 @@
-require("dotenv").config();
 const jwt = require("jsonwebtoken");
+const { User } = require("../models/user");
+const bcrypt = require("bcryptjs");
 
+require("dotenv").config();
 const SECRET = process.env.SECRET;
+
 
 const createToken = (username, id) => {
   return jwt.sign(
@@ -18,15 +21,70 @@ const createToken = (username, id) => {
 
 module.exports = {
   login: async (req, res) => {
-    let { username, password } = req.body;
+    try {
+      let { username, password } = req.body;
+      let foundUser = await User.findOne({where: {username: username}})
 
-    const token = createToken(username, password);
-
-    res.status(200).send(token);
+      if(foundUser){
+        const isAuthenticated = bcrypt.compareSync(password, foundUser.hashedPass);
+        if(isAuthenticated){
+          let token = createToken(
+            foundUser.dataValues.username,
+            foundUser.dataValues.id
+          );
+          const exp = Date.now() + 1000 * 60 * 48;
+  
+          let data = {
+            username: foundUser.dataValues.username,
+            userId: foundUser.dataValues.id,
+            token: token,
+            exp: exp,
+          };
+          res.status(200).send(data);
+        } else{
+          res.status(400).send("Incorrect password");
+        }
+      }else{
+        res.status(400).send("User does not exist.");
+      }
+    } catch (error) {
+      res.status(400).send(error);
+    }
   },
 
   register: async (req, res) => {
-    console.log("register");
-    res.sendStatus(200);
+    try {
+    let { username, password } = req.body;
+    let foundUser = await User.findOne({ where: { username: username } });
+
+      if (foundUser) {
+        res.status(400).send("Username already exists!");
+      } else {
+        const salt = bcrypt.genSaltSync(10);
+        const hash = bcrypt.hashSync(password, salt);
+
+        let newUser = await User.create({
+          username: username,
+          hashedPass: hash,
+        });
+
+        let token = createToken(
+          newUser.dataValues.username,
+          newUser.dataValues.id
+        );
+        const exp = Date.now() + 1000 * 60 * 48;
+
+        let data = {
+          username: newUser.dataValues.username,
+          userId: newUser.dataValues.id,
+          token: token,
+          exp: exp,
+        };
+        res.status(200).send(data);
+      }
+    } catch (error) {
+      console.log(error);
+      res.status(400).send(error);
+    }
   },
 };
